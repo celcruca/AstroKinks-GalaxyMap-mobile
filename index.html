@@ -1,0 +1,178 @@
+<!-- =============================================================================
+ * Project : アストロキングス - 蠱毒な銀河へようこそ！
+ * File    : index.html
+ * Version : Ver. 0.02 / Rev. 016
+ * Date    : 2025-10-08 (水)
+ * Library : -
+ * Function: メインエントリーポイント (PIXIJS 読み込み・UI の土台)
+ * Notes   :
+ *   - 端末マルチビュー: デスクトップとモバイルで UI コンテナを共通化しつつ、表示幅に応じて再構成する。
+ * =============================================================================
+-->
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>アストロキングス - 蠱毒な銀河へようこそ！</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <link
+      rel="icon"
+      href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="%230b0f16"/><circle cx="16" cy="16" r="10" fill="%2333aa55"/></svg>'
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.4.0/pixi.min.js" defer></script>
+  </head>
+  <body>
+    <div id="app-shell">
+      <div id="app"></div>
+
+      <div id="top-panel" class="command-panel" aria-live="polite">
+        <div class="panel-header">
+          <div id="title-row">
+            <div id="face">( ^o^ )</div>
+            <h1 id="menu-title">
+              <span class="line1">アストロキングス</span>
+              <span class="line2">蠱毒な銀河へようこそ！</span>
+            </h1>
+          </div>
+          <button id="panelDrawerToggle" class="panel-toggle" type="button" aria-expanded="true" aria-controls="panel-body">
+            メニュー収納
+          </button>
+        </div>
+        <div id="panel-body" class="panel-body" role="region" aria-label="司令メニュー" tabindex="-1">
+          <div class="panel-section" aria-label="基本操作">
+            <div class="row action-grid">
+              <button id="btnFit" class="btn" type="button">全域表示</button>
+              <button id="btnStd" class="btn" type="button">標準サイズ</button>
+            </div>
+            <div class="row search-row">
+              <input id="kw" type="text" placeholder="検索: RSF / 500:478" autocomplete="off" />
+              <button id="btnSearch" class="btn" type="button">検索</button>
+            </div>
+            <div class="row quick-row">
+              <button id="btnClear" class="btn ghost" type="button">選択解除</button>
+            </div>
+          </div>
+
+          <div class="panel-section ballistic-wrapper">
+            <div id="ballisticSection" class="menu-section" aria-labelledby="ballisticHeading">
+              <div class="menu-heading-row spaced">
+                <h2 id="ballisticHeading" class="menu-heading">弾着計算</h2>
+                <button
+                  id="ballisticToggle"
+                  class="menu-toggle"
+                  type="button"
+                  aria-expanded="true"
+                  aria-controls="ballisticContent"
+                  aria-label="弾着計算を折りたたむ"
+                >▼</button>
+              </div>
+              <div id="ballisticContent" class="ballistic-content">
+                <div class="ballistic-field">
+                  <label class="ballistic-title" for="distanceFrom">発射地点：</label>
+                  <input
+                    id="distanceFrom"
+                    class="menu-input ballistic-input"
+                    type="text"
+                    placeholder="オブジェクト名 / 123:456"
+                    autocomplete="off"
+                  />
+                </div>
+                <div class="ballistic-field">
+                  <label class="ballistic-title" for="distanceTo">着弾地点：</label>
+                  <input
+                    id="distanceTo"
+                    class="menu-input ballistic-input"
+                    type="text"
+                    placeholder="オブジェクト名 / 123:456"
+                    autocomplete="off"
+                  />
+                </div>
+                <div class="ballistic-action">
+                  <button id="btnDistance" class="ballistic-button" type="button">距離確認</button>
+                  <button id="btnRallyCountdown" class="ballistic-button" type="button" disabled aria-disabled="true">集結カウント</button>
+                </div>
+                <div class="ballistic-metric">
+                  <span class="ballistic-title">行軍距離：</span>
+                  <span id="distanceResult" class="ballistic-value" aria-live="polite">
+                    <span data-role="distance-hex">000 ヘクス</span>
+                  </span>
+                </div>
+                <div class="ballistic-metric">
+                  <span class="ballistic-title">行軍時間：</span>
+                  <span id="marchTime" class="ballistic-value">00:00,00</span>
+                </div>
+                <div class="ballistic-impact">
+                  <label class="ballistic-title" for="impactTime">弾着時間：</label>
+                  <input
+                    id="impactTime"
+                    class="menu-input ballistic-input ballistic-impact-input"
+                    type="text"
+                    inputmode="numeric"
+                    autocomplete="off"
+                    value="40:00"
+                    aria-label="弾着時間 (MM:SS)"
+                    maxlength="5"
+                  />
+                  <button id="btnTimeAdjust" class="ballistic-button impact-button" type="button">時間補正</button>
+                </div>
+                <div class="ballistic-toggles">
+                  <span class="ballistic-title">ネスト効果：</span>
+                  <div class="ballistic-toggle-group" role="group" aria-label="ネスト効果">
+                    <button id="btnNestInside" class="toggle-button active" type="button" aria-pressed="true">ネスト内</button>
+                    <button id="btnNestOutside" class="toggle-button" type="button" aria-pressed="false">ネスト外</button>
+                  </div>
+                </div>
+                <div class="ballistic-toggles">
+                  <span class="ballistic-title">着弾目標：</span>
+                  <div class="ballistic-toggle-group" role="group" aria-label="着弾目標">
+                    <button id="btnTargetPlanet" class="toggle-button active" type="button" aria-pressed="true">惑星</button>
+                    <button id="btnTargetSatellite" class="toggle-button" type="button" aria-pressed="false">衛星</button>
+                    <button id="btnTargetBase" class="toggle-button" type="button" aria-pressed="false">拠点</button>
+                    <button id="btnTargetPvp" class="toggle-button" type="button" aria-pressed="false">PvP</button>
+                  </div>
+                </div>
+                <div class="ballistic-toggles">
+                  <span class="ballistic-title">集結時間：</span>
+                  <div class="ballistic-toggle-group" role="group" aria-label="集結時間">
+                    <button id="btnRally5" class="toggle-button active" type="button">5分</button>
+                    <button id="btnRally10" class="toggle-button" type="button">10分</button>
+                    <button id="btnRally15" class="toggle-button" type="button">15分</button>
+                    <button id="btnRally30" class="toggle-button" type="button">30分</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="status">準備完了です。</div>
+      <div id="credit">cRSF</div>
+      <div id="cursor"></div>
+
+      <div id="mobile-action-bar" class="mobile-action-bar" aria-label="主要操作ショートカット">
+        <button class="mobile-action" type="button" data-proxy-target="btnFit">全域</button>
+        <button class="mobile-action" type="button" data-proxy-target="btnStd">標準</button>
+        <button class="mobile-action" type="button" data-proxy-target="btnClear">解除</button>
+        <button class="mobile-action mobile-action--primary" type="button" id="mobileMenuButton" aria-haspopup="true" aria-controls="panel-body">
+          メニュー
+        </button>
+      </div>
+    </div>
+
+    <div id="rallyPopup" class="rally-popup" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="rally-popup-content" role="document">
+        <p class="rally-popup-text"><span class="rally-popup-label">目標：</span><span id="rallyPopupTarget">---</span></p>
+        <p class="rally-popup-text">
+          <span id="rallyPopupCountdownLabel">--分集結までのカウントダウン：</span>
+          <span id="rallyPopupTimer" class="rally-popup-timer" aria-live="assertive">00:00.00</span>
+        </p>
+        <div class="rally-popup-actions">
+          <button id="btnRallyPopupClose" class="ballistic-button rally-popup-close" type="button">閉じる</button>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
