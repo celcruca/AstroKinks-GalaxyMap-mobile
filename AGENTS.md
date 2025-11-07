@@ -4,7 +4,7 @@
  * Version : Ver. 0.02 / Rev. 036
  * Date    : 2025-10-31 (金)
  * Library : -
- * Function: 統合ガバナンス・技術正典・構造正典（Rev.035）
+ * Function: 統合ガバナンス・技術正典・構造正典（Rev.036）
  * Notes   :
  *   - ★本改修: シングルクリック選択は描画のみ更新し、ビューの自動センタリングを禁止。
  *   - ★本改修: ステータス文言を日本語へ統一し、文字化けを防止。
@@ -21,7 +21,8 @@
  *   - ★本改修: 弾着時間カウントダウン中に集結カウントを押下すると、選択した集結時間に合わせた発射タイミングを算出し、弾着残り時間から行軍時間を差し引いた MM:SS.cc 表示ポップアップで集結開始までのカウントダウンと目標情報を提示する仕様を追加。
  *   - ★本改修: 弾着時間の入力フォーカス中はカウントダウンが値を上書きせず、時間補正ボタン押下時に入力値からカウントダウンを再開する仕様を徹底。
  *   - ★本改修: 選択解除操作で距離計測ラインと関連カウントダウン（集結ポップアップ含む）を即時リセットする仕様を追加。
- *   - ★本改修: トップパネルの配置を調整し、ルーラー帯と干渉しないよう上余白を 56 px に統一。
+ *   - ★本改修: 表示基準を 2,400×1,080 ドットに正典化し、ルーラー帯（SAFE top 32 px / left 40 px）とフォントを 13 px へ縮小、目盛 8 px・間隔 48 px で HUD の視認性を維持。
+ *   - ★本改修: PIXI レンダラーの解像度を DPR 1.5 上限・アンチエイリアス/autoDensity 無効化で軽量化し、トップパネル格納時は #top-panel を完全非表示にする浮遊トグル仕様へ統合。
  *   - ★本改修: 弾着時間行を行軍時間とネスト効果の間に配置し、入力フォーカス中はカウントダウン表示を一時停止する UI ルールを追加。
  *   - ★本改修: 着弾目標トグル（惑星／衛星／拠点／PvP）を追加し、集結時間トグルの直前に配置。既定選択は惑星。
  *   - ★本改修: STRIKE.secondsPerHex にターゲット別の行軍秒数係数を定義し、ネスト外選択時は +10% 加算で行軍時間を算出。
@@ -101,7 +102,7 @@
 ### 2.2 HUD / グリッド
 - グリッド線：線幅 1 px / α = 0.35 / 色 #2f5678（ブルースチール）。  
 - 200/400/600/800 ガイド：線幅 4 px / α = 0.25 / 色 THEME.guideColor。  
-- ルーラー帯：上 40 px / 左 48 px 固定。ラベルは帯中央に配置し 10 進・3 桁ゼロ詰めで、1/5/10/25/50/100 から動的に刻みを自動選択（縦横連動）。  
+- ルーラー帯：上 32 px / 左 40 px 固定。ラベルは帯中央に配置し 10 進・3 桁ゼロ詰めで、1/5/10/25/50/100 から動的に刻みを自動選択（縦横連動）。  
 - クロスヘア：単線 2 px、ラベルは [qqq:rrr] 表示。world 外では非表示。  
 - 暗幕：world 外を α = 0.35 で遮蔽し、固定帯との境界を明示する。
 
@@ -119,7 +120,7 @@
 - ラベル描画：ラベルはズーム倍率に依存しない固定フォントで描画し、world スケール変更時は逆スケールで補正して常に画面上のサイズを一定に保つ。  
 - 選択ハイライト：シングルクリックしたヘクスは `THEME.selection.color`（既定 0xffd400）の外周線で描画し、ビュー座標は保持する（自動センタリング不可）。  
 - 弾着計算：メニューは初期状態で折りたたみ (`aria-expanded=false`) とし、項目ごとに 1 行構成で「発射地点」「着弾地点」「距離確認」「行軍距離」「行軍時間」「弾着時間」「ネスト効果」「着弾目標」「集結時間」を縦並びに配置する。行軍距離の結果は ``NNN へクス`` 表示（px 値は併記しない）とし、OBJECTS.measurement の線のみマップに描画する。行軍時間は ``MM:SS,cc`` 表示で、STRIKE.secondsPerHex のターゲット係数とネスト効果 (+10%) に STRIKE.marchAdjustmentSeconds （既定 -1 秒）を加算して算出する。弾着時間欄は ``MM:SS`` 形式（既定 ``40:00``）の入力窓と時間補正ボタンで構成し、行軍時間の直下に配置する。時間補正時はフォーカス中の値をそのまま採用し、即座にカウントダウンを再スタートする。入力フォーカス中はカウントダウン表示で上書きしない。距離確認行では右側に「集結カウント」ボタンを同じ高さで横並び配置し、距離算出結果が未確定の間は無効化する。距離確認ボタンと「集結カウント」ボタンはメインメニューと同寸のボタンスタイルを共有し、「集結カウント」押下時は最新の行軍距離／行軍時間と選択した集結時間を用いて発射時刻を逆算し、弾着時間カウントダウンが進行中であれば `目標：<名称 or 座標>` と ``{集結分}分集結までのカウントダウン： MM:SS.cc`` の 2 行で構成されるポップアップを表示して集結開始までの残時間を提示する。ネスト効果は同一行に二択トグルボタンを並列配置し、既定選択は「ネスト内」とする。着弾目標トグルは四択（惑星／衛星／拠点／PvP）で集結時間トグルの直上に配置し、既定選択は惑星。  
-- トップパネル：ルーラー帯と重ならないよう上余白を 56 px に設定し、HUD と視覚的干渉を起こさない位置で固定する。  
+- トップパネル：ルーラー帯と重ならないよう上余白を 48 px（SAFE top 32 px + 余白 16 px）に設定し、HUD と視覚的干渉を起こさない位置で固定する。格納時は #top-panel 自体を非表示にし、浮遊トグルとモバイルメニューからのみ展開する。  
 - ネスト名ラベル：フォントサイズ 18、中心ヘクスの真上（アンカー 0.5 / 0.5）に配置し、直下に 16 pt の ``[qqq:rrr]`` 座標ラベルを表示する（改行を含めた全体の重心が対象ヘクスの中心に一致するよう補正する）。ズームが 10% 以下では座標ラベルを非表示にし、5% 以下ではネスト名の描画スケールを縮めて画面上の文字サイズを段階的に下げ、下限 10 pt を維持する。  
 - 衛星名ラベル：フォントサイズ 16、アンカー 0.5 / 0 に設定し、対象ヘクス直下（ヘクス半径 + 10 px）へ配置する。互いのラベルと干渉する場合は衛星ラベルを一斉非表示とする。
 
@@ -127,12 +128,13 @@
 - 標準中心：GEOMETRY.STANDARD_CENTER = { q: 500, r: 478 }。標準サイズボタン／初期表示ともにテネブリース中心へフォーカスする。  
 - シングルクリック選択ではビュー座標を保持し、フォーカス移動は行わない（TGT／オブジェクトへのフォーカスはそれぞれのハンドラが実施）。  
 - クランプ：000:000〜999:999 を安全帯内で完全表示する左上基準クランプを維持し、余白が生じる場合でも左上は固定する。  
-- 安全帯：上 40 / 左 48 / 右 4 / 下 6 px。ズーム／パン時はこの帯を除いた内側領域で world を収める。
+- 安全帯：上 32 / 左 40 / 右 4 / 下 6 px。ズーム／パン時はこの帯を除いた内側領域で world を収める。
 
 ### 2.5 SSoT 抜粋（map-config.js）
 - HEX_R = 24、WORLD_COLS/ROWS = 1000、WORLD_MARGIN_HEX = 0。  
-- APP.background = 0x0b0f16、CAMERA.wheelStep = 0.15、minZoom = 0.001、maxZoom = 3。  
-- HUD.RULER：majorTick = 10 / minorTick = 6 / fontSize = 16。  
+- APP: background = 0x0b0f16、antialias = false、autoDensity = false、maxRendererResolution = 1.5、baselineResolution = 2400×1080、powerPreference = 'high-performance'。  
+- CAMERA.wheelStep = 0.15、minZoom = 0.001、maxZoom = 3。  
+- HUD.RULER：majorTick = 8 / minorTick = 6 / fontSize = 13 / minSpacing = 48。  
 - OBJECTS.nest.outerAlpha = 0.45、selection.glowAlpha = 0.6。  
 - THEME.selection.color = 0xffd400（選択ハイライトの参照色）。  
 - OBJECTS.target：fillColor = 0x49a8ff、fillAlpha = 0.6、borderColor = 0xffffff、borderAlpha = 0.9、borderWidth = 2、labelFontSize = 16、labelColor = 0xffffff。  
@@ -144,9 +146,9 @@
 - マップが表示領域より小さくなる場合は左上基準でクランプし、外周が常に視界内に収まるようにする。
 
 ### 2.7 モバイル UI / レイアウト
-- ビューポート幅 768 px 以下ではトップパネル（`#top-panel`）を左右 12 px の余白を残した全幅カードに拡張し、スクロールボディ `#panel-body` を `calc(100vh - 180px)` 上限で縦スクロールさせつつ HUD 上端 56 px の安全帯を厳守する。  
-- 640 px 未満ではトップパネルを初期状態で折りたたみ（`body.panel-collapsed`）、`panelDrawerToggle` ボタンおよびモバイルメニュー（`#mobileMenuButton`）の操作で即時展開できるようにする。折りたたみ中は `panel-body` を `aria-hidden=true` とし、ヘッダのみを表示する。  
-- `panelDrawerToggle` は常にトップパネル内に表示し、`aria-expanded` と「メニュー収納／メニュー表示」の文言を同期させる。クリック時には JavaScript で状態を保持し、DOM と body クラスを同時更新する。  
+- ビューポート幅 768 px 以下ではトップパネル（`#top-panel`）を左右 12 px の余白を残した全幅カードに拡張し、スクロールボディ `#panel-body` を `calc(100vh - 180px)` 上限で縦スクロールさせつつ HUD 上端 48 px の安全帯を厳守する。  
+- 640 px 未満ではトップパネルを初期状態で折りたたみ（`body.panel-collapsed`）、`panelDrawerToggle`（浮遊トグル）およびモバイルメニュー（`#mobileMenuButton`）の操作で即時展開できるようにする。折りたたみ中は `#top-panel` に `hidden` / `aria-hidden=true` を付与し、DOM 内の他要素から完全に除外する。  
+- `panelDrawerToggle` は HUD 上部に独立配置し、`aria-expanded` と「メニュー収納／メニュー表示」の文言を同期させる。クリック時には JavaScript で状態を保持し、DOM と body クラスを同時更新する。  
 - 画面下部には `#mobile-action-bar` を配置し、全域表示／標準サイズ／選択解除／メニューの 4 ボタンを並列配置する。これらのボタンは `data-proxy-target` で既存ボタン (`btnFit` 等) を呼び出すプロキシとし、メニュー側の処理を複製しない。  
 - モバイルバーの高さ分だけステータス表示（`#status` / `#credit`）を引き上げ、env(safe-area-inset-bottom) に追従させる。全ボタンのタッチターゲットは最小 44 px を確保し、タップ時にビューを妨げない半透明背景を用いる。
 
@@ -155,8 +157,8 @@
 ## 3. UI固定帯
 | 帯 | 幅(px) | 内容 |
 |----|--------|------|
-| 上 | 40 | X軸ルーラー |
-| 左 | 48 | Y軸ルーラー |
+| 上 | 32 | X軸ルーラー |
+| 左 | 40 | Y軸ルーラー |
 | 右 | 4 | セーフゾーン |
 | 下 | 6 | セーフゾーン |
 
@@ -174,7 +176,7 @@
    - map-config.js を開き、§2.5 の値（HEX_R・HUD・THEME.nest・OBJECTS.nestLabelFontSize 等）が正しいか照合する。  
    - map-object.js の OBJECT_LIST を確認し、座標キーがすべて 000:000〜999:999 内に収まっていること。  
 2. **ビューポート整合**  
-   - map-core.js の clampWorldIntoView が安全帯（上40 / 左48 / 右4 / 下6）を参照し、左上クランプを維持する実装になっているか確認。  
+   - map-core.js の clampWorldIntoView が安全帯（上32 / 左40 / 右4 / 下6）を参照し、左上クランプを維持する実装になっているか確認。  
    - 起動後に標準ビュー（applyStandardView）で 500:478 が中央に表示されることを検証する。  
 3. **HUD / ラベル**  
    - map-hud.js のルーラーラベルが帯中央に配置され、pad3 表記で表示されるか（horizontalLabelY / verticalLabelX）。  
@@ -228,12 +230,12 @@
 ---
 
 ## 7.1 Current Canon (Rev.036)
-- map-config.js: HUD/guide/crosshair パレットを SSoT として保持しつつ、CAMERA.minZoom = 0.001・ネスト外周 α = 0.45・THEME.selection.color = 0xffd400・OBJECTS.target／OBJECTS.measurement（lineWidth = 5）のスタイルを正典化し、STRIKE.secondsPerHex に惑星／衛星／拠点／PvP 用の行軍秒数係数、STRIKE.marchAdjustmentSeconds = -1、STRIKE.impact.defaultSeconds = 40 × 60 を保持する。  
-- map-core.js: SAFE 帯 (top40/left48/right4/bottom6) を考慮した左上クランプと表示短辺 1/2 ルールを維持し、シングルクリック選択ではビュー位置を固定する。  
-- main.js: 「標準サイズ」で標準中心 { q:500, r:478 } にフォーカスし、ステータス表示を日本語へ統一。検索はオブジェクト表示専用とし選択や距離計測を行わず、弾着計算メニューを初期状態で折りたたみ、発地点/着弾点入力・距離確認（結果は ``NNN へクス`` 表示）と右隣に配置する「集結カウント」ボタンで算出済みの行軍距離／行軍時間を集結時間カウントダウンへ連携し、距離結果がリセットされた際はボタンも非活性化する。さらに ``MM:SS,cc`` 表示の「行軍時間：」、``40:00`` 既定の「弾着時間：」ラベル付き ``MM:SS`` 窓と「時間補正」ボタンによるカウントダウン制御を担保。行軍時間は着弾目標トグルに応じて STRIKE.secondsPerHex の係数を選択し、ネスト外選択時は +10% で算出した後 STRIKE.marchAdjustmentSeconds（-1 秒）を加算する。時間補正で弾着カウントダウンが進行している状態で「集結カウント」を押下した際は、弾着残り時間から行軍時間を差し引いた ``MM:SS.cc`` 表示のポップアップを生成して集結残り時間をリアルタイムに提示する。着弾目標トグルの既定は「惑星」で、貿易惑星を着弾地点に指定した場合は自動で惑星、衛星またはテネブリースを指定した場合は自動で衛星へ切り替えて計算する。入力フォーカス中はカウントダウン値で上書きしない。ネスト効果トグルの既定は「ネスト内」。スマホ幅では panelCollapsed 状態を state で保持し、panelDrawerToggle／mobileMenuButton／`data-proxy-target` 経由のショートカットが同一ハンドラを呼び出す。  
-- map-hud.js: snap05・10進 3 桁ラベル・SAFE 帯遮蔽・ルーラー 000〜999 クランプ・クロスヘア描画を維持。  
+- map-config.js: HUD/guide/crosshair パレットを SSoT として保持しつつ、CAMERA.minZoom = 0.001・ネスト外周 α = 0.45・THEME.selection.color = 0xffd400・OBJECTS.target／OBJECTS.measurement（lineWidth = 5）のスタイルを正典化。SAFE 帯は top32/left40/right4/bottom6、APP.antialias = autoDensity = false かつ maxRendererResolution = 1.5・baselineResolution = 2400×1080・powerPreference = 'high-performance'、STRIKE.secondsPerHex（惑星／衛星／拠点／PvP）と STRIKE.marchAdjustmentSeconds = -1、STRIKE.impact.defaultSeconds = 40 × 60 を保持する。  
+- map-core.js: SAFE 帯 (top32/left40/right4/bottom6) を考慮した左上クランプと表示短辺 1/2 ルールを維持し、シングルクリック選択ではビュー位置を固定する。  
+- main.js: 「標準サイズ」で標準中心 { q:500, r:478 } にフォーカスし、ステータス表示を日本語へ統一。検索はオブジェクト表示専用とし選択や距離計測を行わず、弾着計算メニューを初期状態で折りたたみ、発地点/着弾点入力・距離確認（結果は ``NNN へクス`` 表示）と右隣に配置する「集結カウント」ボタンで算出済みの行軍距離／行軍時間を集結時間カウントダウンへ連携し、距離結果がリセットされた際はボタンも非活性化する。さらに ``MM:SS,cc`` 表示の「行軍時間：」、``40:00`` 既定の「弾着時間：」ラベル付き ``MM:SS`` 窓と「時間補正」ボタンによるカウントダウン制御を担保。行軍時間は着弾目標トグルに応じて STRIKE.secondsPerHex の係数を選択し、ネスト外選択時は +10% で算出した後 STRIKE.marchAdjustmentSeconds（-1 秒）を加算する。時間補正で弾着カウントダウンが進行している状態で「集結カウント」を押下した際は、弾着残り時間から行軍時間を差し引いた ``MM:SS.cc`` 表示のポップアップを生成して集結残り時間をリアルタイムに提示する。着弾目標トグルの既定は「惑星」で、貿易惑星を着弾地点に指定した場合は自動で惑星、衛星またはテネブリースを指定した場合は自動で衛星へ切り替えて計算する。入力フォーカス中はカウントダウン値で上書きしない。ネスト効果トグルの既定は「ネスト内」。panelCollapsed 状態を state で保持し、浮遊 panelDrawerToggle／mobileMenuButton／`data-proxy-target` 経由のショートカットから共通ハンドラで格納／展開する。  
+- map-hud.js: snap05・10進 3 桁ラベル・SAFE 帯遮蔽・ルーラー 000〜999 クランプ・クロスヘア描画を維持しつつ、HUD.RULER.fontSize = 13・majorTick = 8・minSpacing = 48 でラベル密度を制御する。  
 - map-overlay.js: ネスト外縁 α = 0.45 の perimeterEdges 描画を継続し、選択ハイライト色を THEME.selection.color に合わせる。TGT 専用レイヤーで青色塗り＋ラベル描画を維持し、弾着計算の線は OBJECTS.measurement の正典値でのみ描画し、マーカーやラベルは生成しない。  
-- index.html / styles.css: HUD と干渉しないパネル配色・シャドウを維持しつつ、panel-body のスクロール領域／panelDrawerToggle／#mobile-action-bar を含むレスポンシブメニューを定義し、タッチターゲット 44 px・safe-area 対応を正典化。
+- index.html / styles.css: HUD と干渉しないパネル配色・シャドウを維持しつつ、panel-body のスクロール領域／float panelDrawerToggle／#mobile-action-bar を含むレスポンシブメニューを定義し、タッチターゲット 44 px・safe-area 対応を正典化。格納時は #top-panel を hidden（display:none）とし、HUD 上部の浮遊トグルとモバイルバーからのみ再展開する。
 
 ### Outstanding Items
 - なし
@@ -242,7 +244,7 @@
 Document : AGENTS.md  
 Project   : アストロキングス - 蠱毒な銀河へようこそ！  
 Version   : Ver.0.02 / Rev.036  
-Verified  : シングルクリック時の静的ビュー維持／THEME.selection.color による選択ハイライト描画／TGT 登録・任意名称・採番再利用／弾着計算メニューの初期折りたたみ・距離確認ボタンと右隣の集結カウントボタン配置／行軍距離（NNN へクス）表示と集結カウント連携／行軍線描画を OBJECTS.measurement.lineWidth = 5 で太線化／行軍時間 (MM:SS,cc) と STRIKE.secondsPerHex によるターゲット別 + ネスト外 +10% 計算に STRIKE.marchAdjustmentSeconds (-1 秒) を加算する行軍時間補正／距離結果直下へ配置した「弾着時間：」ラベル付き MM:SS 窓（既定 40:00）の時間補正・4 桁入力/全角正規化・編集中の表示保護仕様／時間補正カウントダウン進行中に「集結カウント」押下で目標表示（名称／座標）と ``{集結分}分集結までのカウントダウン： MM:SS.cc`` を呈示し、弾着残り−行軍時間−集結時間による集結開始タイミングを逆算するポップアップの生成／選択解除で距離計測ラインと集結カウントダウンを即時リセット／着弾目標トグル（惑星／衛星／拠点／PvP）の既定・排他選択と貿易惑星/衛星/テネブリース時の自動切替／トップパネルのレスポンシブドロワー化と panelDrawerToggle／mobileMenuButton／`data-proxy-target` 連携によるモバイルショートカットバーの正典化  
+Verified  : シングルクリック時の静的ビュー維持／THEME.selection.color による選択ハイライト描画／TGT 登録・任意名称・採番再利用／弾着計算メニューの初期折りたたみ・距離確認ボタンと右隣の集結カウントボタン配置／行軍距離（NNN へクス）表示と集結カウント連携／行軍線描画を OBJECTS.measurement.lineWidth = 5 で太線化／行軍時間 (MM:SS,cc) と STRIKE.secondsPerHex によるターゲット別 + ネスト外 +10% 計算に STRIKE.marchAdjustmentSeconds (-1 秒) を加算する行軍時間補正／距離結果直下へ配置した「弾着時間：」ラベル付き MM:SS 窓（既定 40:00）の時間補正・4 桁入力/全角正規化・編集中の表示保護仕様／時間補正カウントダウン進行中に「集結カウント」押下で目標表示（名称／座標）と ``{集結分}分集結までのカウントダウン： MM:SS.cc`` を呈示し、弾着残り−行軍時間−集結時間による集結開始タイミングを逆算するポップアップの生成／選択解除で距離計測ラインと集結カウントダウンを即時リセット／着弾目標トグル（惑星／衛星／拠点／PvP）の既定・排他選択と貿易惑星/衛星/テネブリース時の自動切替／SAFE 帯 (top32/left40) と HUD ルーラー文字 13 px・majorTick 8 px・minSpacing 48 px の縮小および DPR 1.5 上限 + アンチエイリアス/autoDensity 無効化によるメモリ抑制／格納時に #top-panel を hidden へ移行し浮遊 panelDrawerToggle と mobileMenuButton／`data-proxy-target` 連携によるモバイルショートカットバーの正典化  
 Approved  : Tech Lead / Product Lead / Documentation Lead  
 [/Canon Validation Stamp]
 
@@ -278,7 +280,7 @@ Approved  : Tech Lead / Product Lead / Documentation Lead
 - **判定**: 3桁ゼロ詰めの10進で一致（例: 150→150）
 
 ### C-9 固定帯の境界整合
-- **手順**: 上40/左48/右4/下6 の固定帯でグリッドの原点がズレないことを確認
+- **手順**: 上32/左40/右4/下6 の固定帯でグリッドの原点がズレないことを確認
 - **判定**: 原点は固定帯の内側に一致（±0.5px以内）
 
 ---

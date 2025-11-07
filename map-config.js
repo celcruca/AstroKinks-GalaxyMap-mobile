@@ -17,8 +17,11 @@
 
 export const APP = Object.freeze({
   background: 0x0b0f16,
-  antialias: true,
-  autoDensity: true,
+  antialias: false,
+  autoDensity: false,
+  maxRendererResolution: 1.5,
+  powerPreference: 'high-performance',
+  baselineResolution: Object.freeze({ width: 2400, height: 1080 }),
 });
 
 export const CAMERA = Object.freeze({
@@ -30,14 +33,14 @@ export const CAMERA = Object.freeze({
 
 export const UI = Object.freeze({
   SAFE: Object.freeze({
-    top: 40,
-    left: 48,
+    top: 32,
+    left: 40,
     right: 4,
     bottom: 6,
   }),
   FIXED: Object.freeze({
-    top: Object.freeze({ height: 40 }),
-    left: Object.freeze({ width: 48 }),
+    top: Object.freeze({ height: 32 }),
+    left: Object.freeze({ width: 40 }),
     right: Object.freeze({ width: 4 }),
     bottom: Object.freeze({ height: 6 }),
   }),
@@ -74,9 +77,10 @@ export const HUD = Object.freeze({
     alpha: 0.25,
   }),
   RULER: Object.freeze({
-    majorTick: 10,
+    majorTick: 8,
     minorTick: 6,
-    fontSize: 16,
+    fontSize: 13,
+    minSpacing: 48,
     steps: Object.freeze([1, 5, 10, 25, 50, 100]),
   }),
   CROSSHAIR: Object.freeze({

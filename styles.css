@@ -1,8 +1,8 @@
 /* =============================================================================
  * Project : アストロキングス - 蠱毒な銀河へようこそ！
  * File    : styles.css
- * Version : Ver. 0.02 / Rev. 016
- * Date    : 2025-10-08 (水)
+ * Version : Ver. 0.02 / Rev. 017
+ * Date    : 2025-10-31 (金)
  * Library : -
  * Function: UI コンテナと操作メニューのレイアウト定義
  * Notes   :
@@ -21,7 +21,7 @@
   --panel-header-height: 48px;
   --action-gap: 10px;
   --touch-min: 44px;
-  --hud-safe-top: 56px;
+  --hud-safe-top: 48px;
 }
 
 html,
@@ -75,15 +75,10 @@ canvas {
   display: flex;
   flex-direction: column;
   gap: var(--panel-spacer);
-  transition: transform 0.25s ease, opacity 0.25s ease;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
 body.panel-collapsed #top-panel {
-  transform: translateY(calc(-100% + 20px));
-  opacity: 0.92;
-}
-
-body.panel-collapsed #top-panel .panel-body {
   display: none;
 }
 
@@ -155,6 +150,25 @@ body.panel-collapsed #top-panel .panel-body {
 
 .panel-toggle:active {
   transform: translateY(1px);
+}
+
+.floating-panel-toggle {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  z-index: 80;
+  border-radius: 999px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+body.panel-collapsed .floating-panel-toggle {
+  opacity: 0.95;
+}
+
+@media (max-width: 768px) {
+  .floating-panel-toggle {
+    right: 12px;
+  }
 }
 
 .panel-body {

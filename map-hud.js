@@ -397,7 +397,7 @@ function resolveRulerStep(centerHex){
   const candidates =
     (Array.isArray(HUD.RULER.steps) && HUD.RULER.steps.length && HUD.RULER.steps) ||
     [1, 5, 10, 25, 50, 100];
-  const minSpacing = 56;
+  const minSpacing = Number.isFinite(HUD.RULER.minSpacing) ? HUD.RULER.minSpacing : 56;
   const baseQ = Number(centerHex?.q) || 0;
   const baseR = Number(centerHex?.r) || 0;
   for (const step of candidates){

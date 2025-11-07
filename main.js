@@ -180,11 +180,15 @@ function ensurePixiReady(){
 }
 
 async function createApplication(host){
+  const devicePixelRatio = window.devicePixelRatio || 1;
+  const maxRendererResolution = Number.isFinite(APP?.maxRendererResolution) ? APP.maxRendererResolution : 2;
+  const resolution = Math.min(devicePixelRatio, maxRendererResolution);
   const options = {
     background: APP.background,
-    antialias: APP.antialias,
-    autoDensity: APP.autoDensity,
-    resolution: window.devicePixelRatio || 1,
+    antialias: APP.antialias ?? false,
+    autoDensity: APP.autoDensity ?? false,
+    resolution,
+    powerPreference: APP.powerPreference ?? 'high-performance',
     resizeTo: host,
   };
 
@@ -321,6 +325,10 @@ function updatePanelCollapseUi(){
   document.body.classList.toggle('panel-collapsed', state.panelCollapsed);
   if (dom.panelBody){
     dom.panelBody.setAttribute('aria-hidden', state.panelCollapsed ? 'true' : 'false');
+  }
+  if (dom.topPanel){
+    dom.topPanel.hidden = state.panelCollapsed;
+    dom.topPanel.setAttribute('aria-hidden', state.panelCollapsed ? 'true' : 'false');
   }
   if (dom.panelDrawerToggle){
     dom.panelDrawerToggle.setAttribute('aria-expanded', state.panelCollapsed ? 'false' : 'true');
